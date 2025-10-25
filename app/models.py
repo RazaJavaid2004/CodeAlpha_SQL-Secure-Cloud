@@ -4,6 +4,7 @@ Defines the User model using SQLAlchemy ORM with secure password hashing via Wer
 """
 
 
+from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
 from cryptography.fernet import Fernet
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -48,3 +49,32 @@ class SecureNote(db.Model):
         """Decrypts stored data using AES (Fernet)."""
         fernet = Fernet(key)
         return fernet.decrypt(self.encrypted_data).decode()
+
+class EncryptedFile(db.Model):
+    """Stores encrypted file blobs with metadata."""
+    __tablename__ = 'encrypted_files'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    filename = db.Column(db.String(120), nullable=False)
+    encrypted_data = db.Column(db.LargeBinary, nullable=False)
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    def __init__(self, user_id: int, filename: str, encrypted_data: bytes):
+        """Initializes an encrypted file record."""
+        self.user_id = user_id
+        self.filename = filename
+        self.encrypted_data = encrypted_data
+
+class AuditLog(db.Model):
+    """Tracks user actions for audit purposes."""
+    __tablename__ = 'audit_logs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    action = db.Column(db.String(120), nullable=False)
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    def __init__(self, user_id: int, action: str):
+        self.user_id = user_id
+        self.action = action
