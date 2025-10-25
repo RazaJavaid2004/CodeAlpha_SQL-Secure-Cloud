@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload File | SQL Secure Cloud</title>
+</head>
+<body>
+  <h2>Upload Encrypted File</h2>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST" enctype="multipart/form-data" action="{{ url_for('main.upload') }}">
+    <input type="file" name="file" required><br><br>
+    <button type="submit">Upload & Encrypt</button>
+  </form>
+
+  <p><a href="{{ url_for('main.dashboard') }}">Back to Dashboard</a></p>
+</body>
+</html>
